@@ -132,6 +132,9 @@ export function setApiUrl(url) {
 }
 
 // Inicializa dados no localStorage se vazios
+const MOCK_ORDER_IDS = new Set(['PED-101', 'PED-102', 'PED-103', 'PED-104', 'PED-105', 'PED-106']);
+const MOCK_EXPENSE_IDS = new Set(['DESP-1', 'DESP-2']);
+
 export function initializeLocalStorage() {
   if (!localStorage.getItem(STORAGE_KEYS.PEDIDOS)) {
     localStorage.setItem(STORAGE_KEYS.PEDIDOS, JSON.stringify(INITIAL_PEDIDOS));
@@ -144,6 +147,33 @@ export function initializeLocalStorage() {
   }
   if (!localStorage.getItem(STORAGE_KEYS.SYNC_QUEUE)) {
     localStorage.setItem(STORAGE_KEYS.SYNC_QUEUE, JSON.stringify([]));
+  }
+
+  // Purga automática de pedidos e despesas mockados de demonstração
+  try {
+    const rawP = localStorage.getItem(STORAGE_KEYS.PEDIDOS);
+    if (rawP) {
+      const parsedP = JSON.parse(rawP);
+      if (Array.isArray(parsedP)) {
+        const limposP = parsedP.filter(p => !MOCK_ORDER_IDS.has(String(p.id)));
+        if (limposP.length !== parsedP.length) {
+          localStorage.setItem(STORAGE_KEYS.PEDIDOS, JSON.stringify(limposP));
+        }
+      }
+    }
+
+    const rawD = localStorage.getItem(STORAGE_KEYS.DESPESAS);
+    if (rawD) {
+      const parsedD = JSON.parse(rawD);
+      if (Array.isArray(parsedD)) {
+        const limposD = parsedD.filter(d => !MOCK_EXPENSE_IDS.has(String(d.id)));
+        if (limposD.length !== parsedD.length) {
+          localStorage.setItem(STORAGE_KEYS.DESPESAS, JSON.stringify(limposD));
+        }
+      }
+    }
+  } catch {
+    //
   }
 }
 
