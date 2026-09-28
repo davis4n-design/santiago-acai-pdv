@@ -29,7 +29,10 @@ import {
   Search,
   RotateCcw,
   BarChart3,
-  Database
+  Database,
+  Eye,
+  TrendingUp,
+  TrendingDown
 } from 'lucide-react';
 import { DEFAULT_BAIRROS, PAYMENT_METHODS } from '../data/defaultData';
 import { formatCurrency, formatTime, getTodayDateString, parseRecordDate, isRecordFromToday, getRecordDateString } from '../utils/formatters';
@@ -37,6 +40,7 @@ import { getPlatformFees, getSheetsViewUrl, setSheetsViewUrl, convertToPreviewUr
 import ConfigTaxasPlataformas from './ConfigTaxasPlataformas';
 import ConfigBairrosCacapava from './ConfigBairrosCacapava';
 import ConfigPlanilhaGoogle from './ConfigPlanilhaGoogle';
+import ModalDetalheFechamento from './ModalDetalheFechamento';
 import GerenciadorFiados from './GerenciadorFiados';
 import EditOrderModal from './EditOrderModal';
 import DashboardAnalitico from './DashboardAnalitico';
@@ -87,6 +91,7 @@ export default function TouchTerminalERP({
   const [pedidoEmEdicao, setPedidoEmEdicao] = useState(null);
   const [showDatePickerModal, setShowDatePickerModal] = useState(false);
   const [tempDataPicker, setTempDataPicker] = useState(todayStr);
+  const [modalDetalheFechamento, setModalDetalheFechamento] = useState(null); // 'despesas' | 'lucro' | 'faturado' | null
   const [gerencialModalConfig, setGerencialModalConfig] = useState({
     isOpen: false,
     title: 'PIN Gerencial',
@@ -1284,37 +1289,231 @@ export default function TouchTerminalERP({
         {/* ======================================================== */}
         {/* TELAS SECUNDÁRIAS DENTRO DO TERMINAL                     */}
         {/* ======================================================== */}
+        {/* ======================================================== */}
+        {/* TELAS SECUNDÁRIAS DENTRO DO TERMINAL                     */}
+        {/* ======================================================== */}
         {terminalView === 'fechamento' && (
-          <div className="h-full w-full bg-white border border-slate-300 rounded-2xl p-4 sm:p-6 overflow-y-auto space-y-4">
-            <div className="flex items-center justify-between border-b pb-3">
+          <div className="h-full w-full bg-slate-50/50 border border-slate-300 rounded-2xl p-4 sm:p-6 overflow-y-auto space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-4 bg-white p-4 rounded-2xl shadow-xs">
               <div>
-                <h2 className="text-xl font-black text-slate-900">Fechamento do Caixa</h2>
-                <p className="text-xs text-slate-500">Conferência diária do terminal</p>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-xl font-black text-slate-900">Fechamento e Auditoria do Caixa</h2>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-200">
+                    Hoje: {todayStr.split('-').reverse().join('/')}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Conferência do dia • Clique nos cartões abaixo para abrir o detalhamento completo de cada valor
+                </p>
               </div>
               <button
                 onClick={() => setTerminalView('pdv')}
-                className="px-4 py-2 bg-[#3b0764] text-white rounded-xl text-xs font-bold hover:bg-purple-900"
+                className="px-4 py-2.5 bg-[#3b0764] text-white rounded-xl text-xs font-bold hover:bg-purple-900 transition-all shadow-sm active:scale-95 cursor-pointer flex items-center gap-2"
               >
-                ← Voltar ao Terminal PDV
+                <span>← Voltar ao Terminal PDV</span>
               </button>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
-                <span className="text-xs text-slate-500 font-bold block">TOTAL FATURADO</span>
-                <span className="text-2xl font-mono font-black text-emerald-600">{formatCurrency(totalFaturadoHoje)}</span>
+            {/* 4 CARDS INTERATIVOS COM BADGES DE CLIQUE */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+              {/* Card 1: TOTAL FATURADO */}
+              <div 
+                onClick={() => setModalDetalheFechamento('faturado')}
+                role="button"
+                tabIndex={0}
+                className="group bg-white hover:bg-emerald-50/40 border border-slate-200 hover:border-emerald-400 p-4 rounded-2xl transition-all shadow-xs hover:shadow-md cursor-pointer relative overflow-hidden"
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">TOTAL FATURADO</span>
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full group-hover:bg-emerald-200 transition-colors">
+                    <Eye className="w-3 h-3" />
+                    <span>Ver Origem</span>
+                  </span>
+                </div>
+                <div className="text-2xl sm:text-3xl font-mono font-black text-emerald-600">
+                  {formatCurrency(totalFaturadoHoje)}
+                </div>
+                <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                  <span>{pedidosHoje.length} pedidos hoje</span>
+                  <span className="font-semibold text-emerald-600 group-hover:underline">Detalhar canais →</span>
+                </div>
               </div>
-              <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
-                <span className="text-xs text-slate-500 font-bold block">QUANTIDADE PEDIDOS</span>
-                <span className="text-2xl font-mono font-black text-slate-900">{pedidosHoje.length}</span>
+
+              {/* Card 2: QUANTIDADE PEDIDOS */}
+              <div 
+                onClick={() => setTerminalView('historico')}
+                role="button"
+                tabIndex={0}
+                className="group bg-white hover:bg-purple-50/40 border border-slate-200 hover:border-purple-400 p-4 rounded-2xl transition-all shadow-xs hover:shadow-md cursor-pointer relative overflow-hidden"
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider">QTD. PEDIDOS</span>
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-purple-800 bg-purple-100 px-2 py-0.5 rounded-full group-hover:bg-purple-200 transition-colors">
+                    <Receipt className="w-3 h-3" />
+                    <span>Ver Pedidos</span>
+                  </span>
+                </div>
+                <div className="text-2xl sm:text-3xl font-mono font-black text-slate-900">
+                  {pedidosHoje.length}
+                </div>
+                <div className="mt-2 pt-2 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+                  <span>
+                    Ticket médio: {pedidosHoje.length > 0 ? formatCurrency(totalFaturadoHoje / pedidosHoje.length) : 'R$ 0,00'}
+                  </span>
+                  <span className="font-semibold text-purple-700 group-hover:underline">Histórico →</span>
+                </div>
               </div>
-              <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
-                <span className="text-xs text-slate-500 font-bold block">TOTAL DESPESAS</span>
-                <span className="text-2xl font-mono font-black text-rose-600">{formatCurrency(totalDespesasHoje)}</span>
+
+              {/* Card 3: TOTAL DESPESAS (Destaque para entender os R$ 122,43) */}
+              <div 
+                onClick={() => setModalDetalheFechamento('despesas')}
+                role="button"
+                tabIndex={0}
+                className="group bg-white hover:bg-rose-50/50 border-2 border-rose-200 hover:border-rose-400 p-4 rounded-2xl transition-all shadow-xs hover:shadow-md cursor-pointer relative overflow-hidden ring-2 ring-rose-50"
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] text-rose-700 font-bold uppercase tracking-wider">TOTAL DESPESAS</span>
+                  <span className="flex items-center gap-1 text-[10px] font-black text-rose-800 bg-rose-100 px-2 py-0.5 rounded-full group-hover:bg-rose-200 transition-colors animate-pulse">
+                    <Eye className="w-3 h-3" />
+                    <span>Clique p/ Detalhar</span>
+                  </span>
+                </div>
+                <div className="text-2xl sm:text-3xl font-mono font-black text-rose-600">
+                  {formatCurrency(totalDespesasHoje)}
+                </div>
+                <div className="mt-2 pt-2 border-t border-rose-100 flex items-center justify-between text-xs text-rose-600 font-medium">
+                  <span>{despesasHoje.length} lançamento(s) hoje</span>
+                  <span className="font-bold underline">Ver itens e planilha →</span>
+                </div>
               </div>
-              <div className="bg-slate-50 border border-slate-200 p-4 rounded-2xl">
-                <span className="text-xs text-slate-500 font-bold block">LUCRO DO DIA</span>
-                <span className="text-2xl font-mono font-black text-emerald-700">{formatCurrency(lucroLiquidoHoje)}</span>
+
+              {/* Card 4: LUCRO DO DIA (Destaque para a fórmula) */}
+              <div 
+                onClick={() => setModalDetalheFechamento('lucro')}
+                role="button"
+                tabIndex={0}
+                className="group bg-white hover:bg-emerald-50/50 border-2 border-emerald-200 hover:border-emerald-400 p-4 rounded-2xl transition-all shadow-xs hover:shadow-md cursor-pointer relative overflow-hidden ring-2 ring-emerald-50"
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-[11px] text-emerald-800 font-bold uppercase tracking-wider">LUCRO DO DIA</span>
+                  <span className="flex items-center gap-1 text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full group-hover:bg-emerald-200 transition-colors">
+                    <TrendingUp className="w-3 h-3" />
+                    <span>Ver Cálculo</span>
+                  </span>
+                </div>
+                <div className={`text-2xl sm:text-3xl font-mono font-black ${lucroLiquidoHoje >= 0 ? 'text-emerald-700' : 'text-rose-600'}`}>
+                  {formatCurrency(lucroLiquidoHoje)}
+                </div>
+                <div className="mt-2 pt-2 border-t border-emerald-100 flex items-center justify-between text-xs text-emerald-700 font-medium">
+                  <span>Faturamento - Despesas</span>
+                  <span className="font-bold underline">Como é calculado? →</span>
+                </div>
+              </div>
+            </div>
+
+            {/* SEÇÕES DE AUDITORIA VISÍVEL DIRETA NO FECHAMENTO */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* BLOCO 1: ITENS DE DESPESAS DE HOJE */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+                <div className="flex items-center justify-between mb-3 border-b border-slate-100 pb-2.5">
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                      Origem das Despesas de Hoje
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      O que está somando os {formatCurrency(totalDespesasHoje)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setModalDetalheFechamento('despesas')}
+                    className="text-xs text-rose-700 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Ver Tudo</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+
+                {despesasHoje.length === 0 ? (
+                  <div className="py-8 text-center text-slate-400 text-xs">
+                    Nenhuma despesa ou custo lançado para a data de hoje.
+                  </div>
+                ) : (
+                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                    {despesasHoje.map((d, idx) => {
+                      const v = parseFloat(d.valor) || 0;
+                      return (
+                        <div 
+                          key={d.id || idx}
+                          onClick={() => setModalDetalheFechamento('despesas')}
+                          className="flex items-center justify-between p-3 rounded-xl bg-rose-50/60 border border-rose-100 hover:bg-rose-100/60 transition-colors cursor-pointer"
+                        >
+                          <div>
+                            <div className="font-bold text-slate-800 text-xs flex items-center gap-1.5">
+                              <span>{d.descricao || d.nome || 'Despesa'}</span>
+                              {d.categoria && (
+                                <span className="text-[10px] font-medium bg-white px-2 py-0.5 rounded text-rose-700 border border-rose-200">
+                                  {d.categoria}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[10px] text-slate-500 mt-0.5 flex items-center gap-2">
+                              <span>Origem: {d.origem || 'Planilha Google / Fechamento'}</span>
+                              {d.dia && <span>• Dia {d.dia}</span>}
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-mono font-bold text-rose-600 text-sm">
+                              -{formatCurrency(v)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* BLOCO 2: DEMONSTRATIVO RÁPIDO DO LUCRO */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-4 shadow-xs">
+                <div className="flex items-center justify-between mb-3 border-b border-slate-100 pb-2.5">
+                  <div>
+                    <h3 className="font-bold text-slate-800 text-sm flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                      Demonstrativo do Lucro
+                    </h3>
+                    <p className="text-[11px] text-slate-500">
+                      Entenda passo a passo a matemática do dia
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setModalDetalheFechamento('lucro')}
+                    className="text-xs text-emerald-700 font-bold hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Fórmula Completa</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </button>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50">
+                    <span className="text-slate-600 font-medium">(+) Faturamento Bruto ({pedidosHoje.length} pedidos)</span>
+                    <span className="font-mono font-bold text-emerald-600">+{formatCurrency(totalFaturadoHoje)}</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-50">
+                    <span className="text-slate-600 font-medium">(-) Total de Despesas ({despesasHoje.length} lançadas)</span>
+                    <span className="font-mono font-bold text-rose-600">-{formatCurrency(totalDespesasHoje)}</span>
+                  </div>
+                  <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 border border-emerald-200 mt-2">
+                    <div className="font-bold text-emerald-950">
+                      (=) Lucro do Dia
+                      <span className="block text-[10px] font-normal text-emerald-700">Faturamento menos despesas diretas</span>
+                    </div>
+                    <span className="font-mono text-base font-black text-emerald-700">
+                      {formatCurrency(lucroLiquidoHoje)}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -2102,7 +2301,7 @@ export default function TouchTerminalERP({
         }}
       />
 
-      {/* Modal de PIN Gerencial (PIN: 157 - Dashboard, Planilha e Filtros Mês/Todo) */}
+      {/* Modal de PIN Gerencial */}
       <DashboardPinModal
         isOpen={gerencialModalConfig.isOpen}
         title={gerencialModalConfig.title}
@@ -2111,6 +2310,19 @@ export default function TouchTerminalERP({
           gerencialModalConfig.onSuccess();
         }}
         onClose={() => setGerencialModalConfig(prev => ({ ...prev, isOpen: false }))}
+      />
+
+      {/* Modal de Auditoria e Detalhamento do Fechamento do Dia */}
+      <ModalDetalheFechamento
+        isOpen={!!modalDetalheFechamento}
+        tipo={modalDetalheFechamento || 'despesas'}
+        onClose={() => setModalDetalheFechamento(null)}
+        pedidosHoje={pedidosHoje}
+        despesasHoje={despesasHoje}
+        totalFaturadoHoje={totalFaturadoHoje}
+        totalDespesasHoje={totalDespesasHoje}
+        lucroLiquidoHoje={lucroLiquidoHoje}
+        platformFees={platformFees}
       />
     </div>
   );
