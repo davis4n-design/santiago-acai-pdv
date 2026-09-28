@@ -1,0 +1,48 @@
+===============================================================
+  SANTIAGO AÇAÍ E CIA - GUIA DE INSTALAÇÃO VIA PENDRIVE
+===============================================================
+
+Sim! Você pode levar este aplicativo em qualquer pendrive e instalar
+no computador da sua cliente em menos de 1 minuto, sem precisar 
+instalar Node.js, VS Code ou qualquer programa pesado.
+
+---------------------------------------------------------------
+📁 O QUE COPIAR PARA O PENDRIVE:
+---------------------------------------------------------------
+Copie estes 4 itens principais para o seu pendrive (ou a pasta inteira):
+  1. Pasta [dist]
+  2. Arquivo [server.ps1]
+  3. Arquivo [INICIAR_PDV.bat]
+  4. Arquivo [INSTALAR_NO_COMPUTADOR.bat]
+
+---------------------------------------------------------------
+💻 COMO INSTALAR NO COMPUTADOR DA CLIENTE:
+---------------------------------------------------------------
+OPÇÃO 1: INSTALAR DEFINITIVAMENTE NO PC (Recomendado)
+  1. Conecte o pendrive no computador da cliente.
+  2. Dê dois cliques em: [INSTALAR_NO_COMPUTADOR.bat].
+  3. O instalador copiará o sistema para C:\SantiagoPDV e criará
+     automaticamente o atalho "Santiago Açaí - PDV" na Área de Trabalho
+     com a logo oficial.
+  4. Depois disso, você já pode remover o pendrive! A cliente 
+     só precisará clicar no ícone da Área de Trabalho para abrir o caixa.
+
+OPÇÃO 2: RODAR DIRETO DO PENDRIVE (Modo Portátil)
+  1. Conecte o pendrive no computador.
+  2. Dê dois cliques em: [INICIAR_PDV.bat].
+  3. O sistema abre instantaneamente em modo tela de aplicativo!
+
+---------------------------------------------------------------
+🔑 SENHAS E PINS PADRÃO DO SISTEMA:
+---------------------------------------------------------------
+  • PIN do Caixa / Terminal: 159
+  • PIN Gerencial (Dashboard, Planilha e Configurações): 157
+
+---------------------------------------------------------------
+🌐 SINCRONIZAÇÃO COM A PLANILHA GOOGLE:
+---------------------------------------------------------------
+  • O computador da cliente precisa apenas de conexão à internet
+    para sincronizar as vendas em tempo real com a planilha Google.
+  • Se a internet cair, o sistema entra em MODO LOCAL automaticamente,
+    continua vendendo sem travar, e sincroniza quando a internet voltar!
+===============================================================
