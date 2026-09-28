@@ -32,7 +32,8 @@ import {
   Database,
   Eye,
   TrendingUp,
-  TrendingDown
+  TrendingDown,
+  ArrowRight
 } from 'lucide-react';
 import { DEFAULT_BAIRROS, PAYMENT_METHODS } from '../data/defaultData';
 import { formatCurrency, formatTime, getTodayDateString, parseRecordDate, isRecordFromToday, getRecordDateString } from '../utils/formatters';
@@ -265,7 +266,7 @@ export default function TouchTerminalERP({
         // 1. Filtro por Período
         if (filtroHistorico !== 'todo') {
           const pDate = parseRecordDate(p);
-          if (!pDate) return true;
+          if (!pDate) return false;
 
           if (filtroHistorico === 'dia') {
             if (pDate < startOfToday || pDate > endOfToday) return false;
